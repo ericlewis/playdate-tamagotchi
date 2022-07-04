@@ -20,16 +20,19 @@
 #include "stdbool.h"
 #include "stdio.h"
 
+#include "tamalib/tamalib.h"
+#include "pd_api.h"
+
 #include "rom.h"
 #include "state.h"
-#include "tamalib/tamalib.h"
-
-#include "pd_api.h"
+#include "preferences.h"
 
 PlaydateAPI *pd;
 
 static const int top_y = 16;
 static const int bottom_y = 189;
+
+static PDMenuItem *audioMenuItem;
 
 static bool_t lcd_buffer[LCD_HEIGHT][LCD_WIDTH] = {};
 static bool_t icon_buffer[ICON_NUM] = {};
@@ -144,7 +147,7 @@ static void hal_set_frequency(u32_t freq)
 
 static void hal_play_frequency(bool_t play) 
 {
-	if (play) 
+	if (play && preferences_sound_enabled) 
 	{
 		pd->sound->synth->playNote(beeper, frequency, 1, 0.1, 0);
 	} 
@@ -210,6 +213,12 @@ int update(void* userdata)
 	return 1;
 }
 
+void toggled_sound_enabled(void *isEnabled)
+{
+	preferences_sound_enabled = pd->system->getMenuItemValue(audioMenuItem);
+	preferences_save_to_disk();
+}
+
 int eventHandler(PlaydateAPI *playdate, PDSystemEvent event, uint32_t arg) 
 {
 	if (event == kEventInit) 
@@ -244,6 +253,9 @@ int eventHandler(PlaydateAPI *playdate, PDSystemEvent event, uint32_t arg)
 		pd->graphics->drawBitmap(background, 0, 0, 0);
 		icon_changed = true;
 		
+		preferences_read_from_disk();
+		audioMenuItem = pd->system->addCheckmarkMenuItem("Sound", preferences_sound_enabled, toggled_sound_enabled, NULL);
+		
 		tamalib_register_hal(&hal);
 		tamalib_init((u12_t*)g_program, NULL, 1000);
 		
@@ -254,6 +266,7 @@ int eventHandler(PlaydateAPI *playdate, PDSystemEvent event, uint32_t arg)
 	else if (event == kEventTerminate || event == kEventPause || event == kEventLock) 
 	{
 		state_save();
+		preferences_save_to_disk();
 	}
 	
 	return 0;
