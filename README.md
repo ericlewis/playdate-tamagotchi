@@ -10,7 +10,8 @@ Using the standard Playdate SDK, you can run `make` and the resulting PDX can be
 - A button is the right button.
 
 ## Notes
-For some reason... emulation on the simulator is incredibly slow. I do not know why.
+- For some reason... emulation on the simulator is incredibly slow. I do not know why.
+- Auto-saves the state on terminate/lock/pause, but there is no "advancing" time, it will only grow when open.
 
 ## License
 Playdate-Tamagotchi is distributed under the GPLv2 license. See the [LICENSE](./LICENSE) file for more information.

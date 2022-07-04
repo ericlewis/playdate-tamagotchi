@@ -2,3 +2,4 @@ build/*
 source/pdex.bin
 source/pdex.dylib
 *.pdx
+*.zip
