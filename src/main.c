@@ -99,7 +99,7 @@ static void hal_update_screen(void)
 		pd->graphics->drawBitmap(icon_buffer[3] ? icon3 : icon3_off, 258, top_y-1, 0);
 		pd->graphics->drawBitmap(icon_buffer[4] ? icon4 : icon4_off, 100, bottom_y, 0);
 		pd->graphics->drawBitmap(icon_buffer[5] ? icon5 : icon5_off, 151, bottom_y + 5, 0);
-		pd->graphics->drawBitmap(icon_buffer[5] ? icon6 : icon6_off, 199, bottom_y + 5, 0);
+		pd->graphics->drawBitmap(icon_buffer[6] ? icon6 : icon6_off, 199, bottom_y + 5, 0);
 		pd->graphics->drawBitmap(icon_buffer[7] ? icon7 : icon7_off, 258, bottom_y+4, 0);
 		icon_changed = false;
 	}
@@ -241,14 +241,13 @@ int eventHandler(PlaydateAPI *playdate, PDSystemEvent event, uint32_t arg)
 		icon6_off = pd->graphics->loadBitmap("assets/icon6_off", NULL);		
 		icon7_off = pd->graphics->loadBitmap("assets/icon7_off", NULL);	
 				
+		pd->graphics->drawBitmap(background, 0, 0, 0);
+		icon_changed = true;
+		
 		tamalib_register_hal(&hal);
 		tamalib_init((u12_t*)g_program, NULL, 1000);
 		
 		state_load();
-		
-		pd->graphics->drawBitmap(background, 0, 0, 0);
-		
-		icon_changed = true;
 		
 		playdate->system->setUpdateCallback(update, playdate);
 	} 
