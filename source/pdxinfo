@@ -1,0 +1,7 @@
+name=Tamagotchi
+author=Eric Lewis
+description=A classic Tamagotchi emulator.
+bundleID=com.ericlewis.tamagotchi
+version=1.0.2
+buildNumber=1
+imagePath=assets/card

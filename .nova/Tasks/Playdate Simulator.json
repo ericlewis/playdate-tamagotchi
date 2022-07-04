@@ -1,0 +1,11 @@
+{
+  "extension" : {
+    "identifier" : "com.panic.Playdate",
+    "name" : "Playdate"
+  },
+  "extensionTemplate" : "simulator",
+  "extensionValues" : {
+    "playdate.build-type" : "make"
+  },
+  "identifier" : "87690FEE-7DF8-422B-A6E0-0AEF2C605B88"
+}
