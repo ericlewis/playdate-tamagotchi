@@ -92,18 +92,6 @@ static void hal_sleep_until(timestamp_t ts) {}
 
 static void hal_update_screen(void) 
 {			
-	if (icon_changed) 
-	{
-		pd->graphics->drawBitmap(icon_buffer[0] ? icon0 : icon0_off, 102, top_y, 0);
-		pd->graphics->drawBitmap(icon_buffer[1] ? icon1 : icon1_off, 158, top_y-2, 0);
-		pd->graphics->drawBitmap(icon_buffer[2] ? icon2 : icon2_off, 200, top_y, 0);
-		pd->graphics->drawBitmap(icon_buffer[3] ? icon3 : icon3_off, 258, top_y-1, 0);
-		pd->graphics->drawBitmap(icon_buffer[4] ? icon4 : icon4_off, 100, bottom_y, 0);
-		pd->graphics->drawBitmap(icon_buffer[5] ? icon5 : icon5_off, 151, bottom_y + 5, 0);
-		pd->graphics->drawBitmap(icon_buffer[6] ? icon6 : icon6_off, 199, bottom_y + 5, 0);
-		pd->graphics->drawBitmap(icon_buffer[7] ? icon7 : icon7_off, 258, bottom_y+4, 0);
-		icon_changed = false;
-	}
 	if (lcd_changed) 
 	{
 		pd->graphics->pushContext(frame);
@@ -136,6 +124,18 @@ static void hal_set_lcd_icon(u8_t icon, bool_t val) {
 	}
 	
 	icon_buffer[icon] = val;
+	
+	if (icon_changed)
+	{
+		pd->graphics->drawBitmap(icon_buffer[0] ? icon0 : icon0_off, 102, top_y, 0);
+		pd->graphics->drawBitmap(icon_buffer[1] ? icon1 : icon1_off, 158, top_y-2, 0);
+		pd->graphics->drawBitmap(icon_buffer[2] ? icon2 : icon2_off, 200, top_y, 0);
+		pd->graphics->drawBitmap(icon_buffer[3] ? icon3 : icon3_off, 258, top_y-1, 0);
+		pd->graphics->drawBitmap(icon_buffer[4] ? icon4 : icon4_off, 100, bottom_y, 0);
+		pd->graphics->drawBitmap(icon_buffer[5] ? icon5 : icon5_off, 151, bottom_y + 5, 0);
+		pd->graphics->drawBitmap(icon_buffer[6] ? icon6 : icon6_off, 199, bottom_y + 5, 0);
+		pd->graphics->drawBitmap(icon_buffer[7] ? icon7 : icon7_off, 258, bottom_y+4, 0);
+	}
 }
 
 static void hal_set_frequency(u32_t freq) 
