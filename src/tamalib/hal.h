@@ -20,7 +20,7 @@
 #ifndef _HAL_H_
 #define _HAL_H_
 
-#include "hal_types.h"
+#include "../hal_types.h"
 
 #ifndef NULL
 	#define NULL 0

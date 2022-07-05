@@ -66,17 +66,15 @@ static float frequency = -1;
 
 static void * hal_malloc(u32_t size) 
 {
-	return malloc(size);
+	return NULL;
 }
 
 static void hal_free(void *ptr) 
 {
-	free(ptr);
 }
 
 static void hal_halt(void) 
 {
-	pd->system->error("halted execution");
 }
 
 static bool_t hal_is_log_enabled(log_level_t level) 
@@ -142,7 +140,7 @@ static void hal_set_lcd_icon(u8_t icon, bool_t val) {
 
 static void hal_set_frequency(u32_t freq) 
 {
-	frequency = freq;
+	frequency = freq/10;
 }
 
 static void hal_play_frequency(bool_t play) 
@@ -225,7 +223,7 @@ int eventHandler(PlaydateAPI *playdate, PDSystemEvent event, uint32_t arg)
 	{
 		pd = playdate;
 		
-		pd->display->setRefreshRate(0);
+		pd->display->setRefreshRate(38);
 		
 		beeper = pd->sound->synth->newSynth();
 		frame = pd->graphics->newBitmap(LCD_WIDTH, LCD_HEIGHT, kColorWhite);

@@ -22,10 +22,6 @@
 #include "cpu.h"
 #include "hal.h"
 
-#include "pd_api.h"
-
-PlaydateAPI *pd;
-
 #define DEFAULT_FRAMERATE				30 // fps
 
 static exec_mode_t exec_mode = EXEC_MODE_RUN;
@@ -85,9 +81,9 @@ void tamalib_step(void)
 {
 	if (exec_mode == EXEC_MODE_PAUSE) {
 		return;
-	}	
+	}
 
-	if (cpu_step()) {
+	if (exec_mode == EXEC_MODE_RUN ? cpu_fast_step() : cpu_step()) {
 		exec_mode = EXEC_MODE_PAUSE;
 		step_depth = cpu_get_depth();
 	} else {
@@ -128,7 +124,7 @@ void tamalib_mainloop(void)
 {
 	timestamp_t ts;
 
-	if(!g_hal->handler()) {
+	if (!g_hal->handler()) {
 		tamalib_step();
 
 		/* Update the screen @ g_framerate fps */
