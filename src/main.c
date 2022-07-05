@@ -115,7 +115,7 @@ static void hal_update_screen(void)
 			}
 		}
 		pd->graphics->popContext();
-		pd->graphics->drawScaledBitmap(frame, 102, 74, 6, 6);
+		pd->graphics->drawScaledBitmap(frame, 87, 66, 7, 7);
 		lcd_changed = false;
 	}
 }
