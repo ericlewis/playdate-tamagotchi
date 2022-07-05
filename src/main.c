@@ -223,7 +223,7 @@ int eventHandler(PlaydateAPI *playdate, PDSystemEvent event, uint32_t arg)
 	{
 		pd = playdate;
 		
-		pd->display->setRefreshRate(30);
+		pd->display->setRefreshRate(38);
 		
 		beeper = pd->sound->synth->newSynth();
 		frame = pd->graphics->newBitmap(LCD_WIDTH, LCD_HEIGHT, kColorWhite);
