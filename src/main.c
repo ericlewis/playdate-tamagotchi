@@ -65,31 +65,17 @@ static bool_t icon_changed = false;
 
 static float frequency = -1;
 
-static void * hal_malloc(u32_t size) 
-{
-	return NULL;
-}
-
-static void hal_free(void *ptr) 
-{
-}
-
-static void hal_halt(void) 
-{
-}
-
-static bool_t hal_is_log_enabled(log_level_t level) 
-{
-	return false;
-}
+static void * hal_malloc(u32_t size) { return NULL; }
+static void hal_free(void *ptr) {}
+static void hal_halt(void) {}
+static void hal_log(log_level_t level, char *buff, ...) {}
+static void hal_sleep_until(timestamp_t ts) {}
+static bool_t hal_is_log_enabled(log_level_t level) { return false; }
 
 static timestamp_t hal_get_timestamp(void) 
 {
-	return pd->system->getCurrentTimeMilliseconds();
+	return pd->system->getElapsedTime();
 }
-
-static void hal_log(log_level_t level, char *buff, ...) {}
-static void hal_sleep_until(timestamp_t ts) {}
 
 static void hal_update_screen(void) 
 {			
@@ -226,7 +212,7 @@ void toggled_fast_mode(void *isEnabled)
 	}
 	else
 	{
-		pd->display->setRefreshRate(39);
+		pd->display->setRefreshRate(38);
 	}
 }
 
@@ -236,7 +222,7 @@ int eventHandler(PlaydateAPI *playdate, PDSystemEvent event, uint32_t arg)
 	{
 		pd = playdate;
 		
-		pd->display->setRefreshRate(39);
+		pd->display->setRefreshRate(38);
 		
 		beeper = pd->sound->synth->newSynth();
 		frame = pd->graphics->newBitmap(LCD_WIDTH, LCD_HEIGHT, kColorWhite);
@@ -270,7 +256,7 @@ int eventHandler(PlaydateAPI *playdate, PDSystemEvent event, uint32_t arg)
 		audioMenuItem = pd->system->addCheckmarkMenuItem("Sounds", preferences_sound_enabled, toggled_sound_enabled, NULL);
 		
 		tamalib_register_hal(&hal);
-		tamalib_init((u12_t*)g_program, NULL, 1000);
+		tamalib_init((u12_t*)g_program, NULL, 1000000);
 		
 		state_load();
 		
