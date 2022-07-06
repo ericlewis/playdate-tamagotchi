@@ -62,6 +62,7 @@ static LCDBitmap* icon7_off = NULL;
 
 static bool_t lcd_changed = false;
 static bool_t icon_changed = false;
+static bool_t fast_mode = false;
 
 static float frequency = -1;
 
@@ -69,12 +70,17 @@ static void * hal_malloc(u32_t size) { return NULL; }
 static void hal_free(void *ptr) {}
 static void hal_halt(void) {}
 static void hal_log(log_level_t level, char *buff, ...) {}
-static void hal_sleep_until(timestamp_t ts) {}
 static bool_t hal_is_log_enabled(log_level_t level) { return false; }
 
 static timestamp_t hal_get_timestamp(void) 
 {
-	return pd->system->getElapsedTime();
+	return pd->system->getElapsedTime() * 1000000;
+}
+
+static void hal_sleep_until(timestamp_t ts) {
+	if (!fast_mode) {
+		while((int32_t) (ts - hal_get_timestamp()) > 0);
+	}
 }
 
 static void hal_update_screen(void) 
@@ -208,11 +214,13 @@ void toggled_fast_mode(void *isEnabled)
 {
 	if(pd->system->getMenuItemValue(fastModeMenuItem))
 	{
+		fast_mode = true;
 		pd->display->setRefreshRate(0);
 	}
 	else
 	{
-		pd->display->setRefreshRate(38);
+		fast_mode = false;
+		pd->display->setRefreshRate(50);
 	}
 }
 
@@ -222,7 +230,7 @@ int eventHandler(PlaydateAPI *playdate, PDSystemEvent event, uint32_t arg)
 	{
 		pd = playdate;
 		
-		pd->display->setRefreshRate(38);
+		pd->display->setRefreshRate(50);
 		
 		beeper = pd->sound->synth->newSynth();
 		frame = pd->graphics->newBitmap(LCD_WIDTH, LCD_HEIGHT, kColorWhite);
@@ -252,7 +260,7 @@ int eventHandler(PlaydateAPI *playdate, PDSystemEvent event, uint32_t arg)
 		
 		preferences_read_from_disk();
 		
-		fastModeMenuItem = pd->system->addCheckmarkMenuItem("Fast Mode", false, toggled_fast_mode, NULL);
+		fastModeMenuItem = pd->system->addCheckmarkMenuItem("Fast Mode", fast_mode, toggled_fast_mode, NULL);
 		audioMenuItem = pd->system->addCheckmarkMenuItem("Sounds", preferences_sound_enabled, toggled_sound_enabled, NULL);
 		
 		tamalib_register_hal(&hal);
