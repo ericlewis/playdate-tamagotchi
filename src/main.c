@@ -33,6 +33,7 @@ static const int top_y = 16;
 static const int bottom_y = 189;
 
 static PDMenuItem *audioMenuItem;
+static PDMenuItem *fastModeMenuItem;
 
 static bool_t lcd_buffer[LCD_HEIGHT][LCD_WIDTH] = {};
 static bool_t icon_buffer[ICON_NUM] = {};
@@ -217,13 +218,25 @@ void toggled_sound_enabled(void *isEnabled)
 	preferences_save_to_disk();
 }
 
+void toggled_fast_mode(void *isEnabled)
+{
+	if(pd->system->getMenuItemValue(fastModeMenuItem))
+	{
+		pd->display->setRefreshRate(0);
+	}
+	else
+	{
+		pd->display->setRefreshRate(39);
+	}
+}
+
 int eventHandler(PlaydateAPI *playdate, PDSystemEvent event, uint32_t arg) 
 {
 	if (event == kEventInit) 
 	{
 		pd = playdate;
 		
-		pd->display->setRefreshRate(38);
+		pd->display->setRefreshRate(39);
 		
 		beeper = pd->sound->synth->newSynth();
 		frame = pd->graphics->newBitmap(LCD_WIDTH, LCD_HEIGHT, kColorWhite);
@@ -252,7 +265,9 @@ int eventHandler(PlaydateAPI *playdate, PDSystemEvent event, uint32_t arg)
 		icon_changed = true;
 		
 		preferences_read_from_disk();
-		audioMenuItem = pd->system->addCheckmarkMenuItem("Sound", preferences_sound_enabled, toggled_sound_enabled, NULL);
+		
+		fastModeMenuItem = pd->system->addCheckmarkMenuItem("Fast Mode", false, toggled_fast_mode, NULL);
+		audioMenuItem = pd->system->addCheckmarkMenuItem("Sounds", preferences_sound_enabled, toggled_sound_enabled, NULL);
 		
 		tamalib_register_hal(&hal);
 		tamalib_init((u12_t*)g_program, NULL, 1000);
