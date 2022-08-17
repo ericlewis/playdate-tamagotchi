@@ -24,5 +24,5 @@ SRC = \
 UINCDIR = src/
 UINCDIR += src/tamalib
 
-include $(SDK)/C_API/buildsupport/common_fast.mk
+include $(SDK)/C_API/buildsupport/common.mk
 

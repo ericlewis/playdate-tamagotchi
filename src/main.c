@@ -224,6 +224,7 @@ int eventHandler(PlaydateAPI *playdate, PDSystemEvent event, uint32_t arg)
 		pd = playdate;
 		
 		pd->display->setRefreshRate(38);
+		pd->system->setAutoLockDisabled(1);
 		
 		beeper = pd->sound->synth->newSynth();
 		frame = pd->graphics->newBitmap(LCD_WIDTH, LCD_HEIGHT, kColorWhite);
