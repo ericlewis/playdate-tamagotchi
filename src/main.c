@@ -21,7 +21,7 @@
 #include "stdio.h"
 
 #include "tamalib/tamalib.h"
-#include "pd_api.h"
+#include "pd.h"
 
 #include "rom.h"
 #include "state.h"
@@ -64,25 +64,25 @@ static bool_t icon_changed = false;
 
 static float frequency = -1;
 
-static void * hal_malloc(u32_t size) 
+static void * hal_malloc(u32_t size)
 {
 	return NULL;
 }
 
-static void hal_free(void *ptr) 
+static void hal_free(void *ptr)
 {
 }
 
-static void hal_halt(void) 
+static void hal_halt(void)
 {
 }
 
-static bool_t hal_is_log_enabled(log_level_t level) 
+static bool_t hal_is_log_enabled(log_level_t level)
 {
 	return false;
 }
 
-static timestamp_t hal_get_timestamp(void) 
+static timestamp_t hal_get_timestamp(void)
 {
 	return pd->system->getCurrentTimeMilliseconds();
 }
@@ -90,14 +90,14 @@ static timestamp_t hal_get_timestamp(void)
 static void hal_log(log_level_t level, char *buff, ...) {}
 static void hal_sleep_until(timestamp_t ts) {}
 
-static void hal_update_screen(void) 
-{			
-	if (lcd_changed) 
+static void hal_update_screen(void)
+{
+	if (lcd_changed)
 	{
 		pd->graphics->pushContext(frame);
-		for (int x = 0; x < LCD_WIDTH; x++) 
+		for (int x = 0; x < LCD_WIDTH; x++)
 		{
-			for (int y = 0; y < LCD_HEIGHT; y++) 
+			for (int y = 0; y < LCD_HEIGHT; y++)
 			{
 				pd->graphics->drawRect(x, y, 1, 1, lcd_buffer[y][x] ? kColorBlack : kColorWhite);
 			}
@@ -109,22 +109,22 @@ static void hal_update_screen(void)
 }
 
 static void hal_set_lcd_matrix(u8_t x, u8_t y, bool_t val) {
-	if (!lcd_changed && lcd_buffer[y][x] != val) 
+	if (!lcd_changed && lcd_buffer[y][x] != val)
 	{
 		lcd_changed = true;
 	}
-	
+
 	lcd_buffer[y][x] = val;
 }
 
 static void hal_set_lcd_icon(u8_t icon, bool_t val) {
-	if (!icon_changed && icon_buffer[icon] != val) 
+	if (!icon_changed && icon_buffer[icon] != val)
 	{
 		icon_changed = true;
 	}
-	
+
 	icon_buffer[icon] = val;
-	
+
 	if (icon_changed)
 	{
 		pd->graphics->drawBitmap(icon_buffer[0] ? icon0 : icon0_off, 102, top_y, 0);
@@ -138,54 +138,54 @@ static void hal_set_lcd_icon(u8_t icon, bool_t val) {
 	}
 }
 
-static void hal_set_frequency(u32_t freq) 
+static void hal_set_frequency(u32_t freq)
 {
 	frequency = freq/10;
 }
 
-static void hal_play_frequency(bool_t play) 
+static void hal_play_frequency(bool_t play)
 {
-	if (play && preferences_sound_enabled) 
+	if (play && preferences_sound_enabled)
 	{
 		pd->sound->synth->playNote(beeper, frequency, 1, 0.1, 0);
-	} 
-	else if (pd->sound->synth->isPlaying(beeper)) 
+	}
+	else if (pd->sound->synth->isPlaying(beeper))
 	{
 		pd->sound->synth->noteOff(beeper, 0);
 	}
 }
 
-static int hal_handler(void) 
+static int hal_handler(void)
 {
 	PDButtons released_buttons;
 	PDButtons pressed_buttons;
 	pd->system->getButtonState(NULL, &pressed_buttons, &released_buttons);
-	
-	if (pressed_buttons & kButtonLeft || pressed_buttons & kButtonRight || pressed_buttons & kButtonUp || pressed_buttons & kButtonDown) 
+
+	if (pressed_buttons & kButtonLeft || pressed_buttons & kButtonRight || pressed_buttons & kButtonUp || pressed_buttons & kButtonDown)
 	{
 		tamalib_set_button(BTN_LEFT, BTN_STATE_PRESSED);
-	} 
-	else if (released_buttons & kButtonLeft || released_buttons & kButtonRight || released_buttons & kButtonUp || released_buttons & kButtonDown) 
+	}
+	else if (released_buttons & kButtonLeft || released_buttons & kButtonRight || released_buttons & kButtonUp || released_buttons & kButtonDown)
 	{
 		tamalib_set_button(BTN_LEFT, BTN_STATE_RELEASED);
-	} 
-	else if (pressed_buttons & kButtonA) 
+	}
+	else if (pressed_buttons & kButtonA)
 	{
 		tamalib_set_button(BTN_RIGHT, BTN_STATE_PRESSED);
-	} 
-	else if (released_buttons & kButtonA) 
+	}
+	else if (released_buttons & kButtonA)
 	{
 		tamalib_set_button(BTN_RIGHT, BTN_STATE_RELEASED);
-	} 
-	else if (pressed_buttons & kButtonB) 
+	}
+	else if (pressed_buttons & kButtonB)
 	{
 		tamalib_set_button(BTN_MIDDLE, BTN_STATE_PRESSED);
-	} 
-	else if (released_buttons & kButtonB) 
+	}
+	else if (released_buttons & kButtonB)
 	{
 		tamalib_set_button(BTN_MIDDLE, BTN_STATE_RELEASED);
 	}
-	
+
 	return 0;
 }
 
@@ -205,7 +205,7 @@ static hal_t hal = {
 	.handler = &hal_handler,
 };
 
-int update(void* userdata) 
+int update(void* userdata)
 {
 	tamalib_mainloop();
 	return 1;
@@ -217,56 +217,56 @@ void toggled_sound_enabled(void *isEnabled)
 	preferences_save_to_disk();
 }
 
-int eventHandler(PlaydateAPI *playdate, PDSystemEvent event, uint32_t arg) 
+int eventHandler(PlaydateAPI *playdate, PDSystemEvent event, uint32_t arg)
 {
-	if (event == kEventInit) 
+	if (event == kEventInit)
 	{
 		pd = playdate;
-		
+
 		pd->display->setRefreshRate(38);
 		pd->system->setAutoLockDisabled(1);
-		
+
 		beeper = pd->sound->synth->newSynth();
 		frame = pd->graphics->newBitmap(LCD_WIDTH, LCD_HEIGHT, kColorWhite);
-		
-		background = pd->graphics->loadBitmap("assets/background", NULL);	
-		
-		icon0 = pd->graphics->loadBitmap("assets/icon0", NULL);		
-		icon1 = pd->graphics->loadBitmap("assets/icon1", NULL);		
-		icon2 = pd->graphics->loadBitmap("assets/icon2", NULL);		
-		icon3 = pd->graphics->loadBitmap("assets/icon3", NULL);		
-		icon4 = pd->graphics->loadBitmap("assets/icon4", NULL);		
-		icon5 = pd->graphics->loadBitmap("assets/icon5", NULL);		
-		icon6 = pd->graphics->loadBitmap("assets/icon6", NULL);		
-		icon7 = pd->graphics->loadBitmap("assets/icon7", NULL);		
-		
-		icon0_off = pd->graphics->loadBitmap("assets/icon0_off", NULL);		
-		icon1_off = pd->graphics->loadBitmap("assets/icon1_off", NULL);		
-		icon2_off = pd->graphics->loadBitmap("assets/icon2_off", NULL);		
-		icon3_off = pd->graphics->loadBitmap("assets/icon3_off", NULL);		
-		icon4_off = pd->graphics->loadBitmap("assets/icon4_off", NULL);		
-		icon5_off = pd->graphics->loadBitmap("assets/icon5_off", NULL);		
-		icon6_off = pd->graphics->loadBitmap("assets/icon6_off", NULL);		
-		icon7_off = pd->graphics->loadBitmap("assets/icon7_off", NULL);	
-				
+
+		background = pd->graphics->loadBitmap("assets/background", NULL);
+
+		icon0 = pd->graphics->loadBitmap("assets/icon0", NULL);
+		icon1 = pd->graphics->loadBitmap("assets/icon1", NULL);
+		icon2 = pd->graphics->loadBitmap("assets/icon2", NULL);
+		icon3 = pd->graphics->loadBitmap("assets/icon3", NULL);
+		icon4 = pd->graphics->loadBitmap("assets/icon4", NULL);
+		icon5 = pd->graphics->loadBitmap("assets/icon5", NULL);
+		icon6 = pd->graphics->loadBitmap("assets/icon6", NULL);
+		icon7 = pd->graphics->loadBitmap("assets/icon7", NULL);
+
+		icon0_off = pd->graphics->loadBitmap("assets/icon0_off", NULL);
+		icon1_off = pd->graphics->loadBitmap("assets/icon1_off", NULL);
+		icon2_off = pd->graphics->loadBitmap("assets/icon2_off", NULL);
+		icon3_off = pd->graphics->loadBitmap("assets/icon3_off", NULL);
+		icon4_off = pd->graphics->loadBitmap("assets/icon4_off", NULL);
+		icon5_off = pd->graphics->loadBitmap("assets/icon5_off", NULL);
+		icon6_off = pd->graphics->loadBitmap("assets/icon6_off", NULL);
+		icon7_off = pd->graphics->loadBitmap("assets/icon7_off", NULL);
+
 		pd->graphics->drawBitmap(background, 0, 0, 0);
 		icon_changed = true;
-		
+
 		preferences_read_from_disk();
 		audioMenuItem = pd->system->addCheckmarkMenuItem("Sound", preferences_sound_enabled, toggled_sound_enabled, NULL);
-		
+
 		tamalib_register_hal(&hal);
 		tamalib_init((u12_t*)g_program, NULL, 1000);
-		
+
 		state_load();
-		
+
 		playdate->system->setUpdateCallback(update, playdate);
-	} 
-	else if (event == kEventTerminate || event == kEventPause || event == kEventLock) 
+	}
+	else if (event == kEventTerminate || event == kEventPause || event == kEventLock)
 	{
 		state_save();
 		preferences_save_to_disk();
 	}
-	
+
 	return 0;
 }

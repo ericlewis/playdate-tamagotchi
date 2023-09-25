@@ -21,9 +21,7 @@
 #include "hw.h"
 #include "hal.h"
 
-#include "pd_api.h"
-
-PlaydateAPI *pd;
+#include "pd.h"
 
 #define TICK_FREQUENCY				32768 // Hz
 
@@ -988,7 +986,7 @@ static inline void op_lbpx_cb(u8_t arg0, u8_t arg1)
 static inline void op_set_cb(u8_t arg0, u8_t arg1)
 {
 	flags |= arg0;
-	
+
 	// This might enable a triggered interrupt to now be asserted.
 	interrupt_asserted = 1;
 }
@@ -1031,7 +1029,7 @@ static inline void op_rdf_cb(u8_t arg0, u8_t arg1)
 static inline void op_ei_cb(u8_t arg0, u8_t arg1)
 {
 	SET_I();
-	
+
 	// This might enable a triggered interrupt to now be asserted.
 	interrupt_asserted = 1;
 }
@@ -1039,7 +1037,7 @@ static inline void op_ei_cb(u8_t arg0, u8_t arg1)
 static inline void op_di_cb(u8_t arg0, u8_t arg1)
 {
 	CLEAR_I();
-	
+
 	// Even if there's an interrupt triggered, it won't be asserted now.
 	interrupt_asserted = 0;
 }
@@ -1148,7 +1146,7 @@ static inline void op_pop_f_cb(u8_t arg0, u8_t arg1)
 {
 	flags = M(sp);
 	sp = (sp + 1) & 0xFF;
-	
+
 	// This might enable a triggered interrupt to now be asserted.
 	interrupt_asserted = 1;
 }
@@ -1662,11 +1660,11 @@ static u32_t check_timer_interrupts(void) {
 static int process_interrupts(void)
 {
 	u8_t i;
-	
+
 	// When we return, interrupt_asserted will be false: either there
 	 // wasn't really an interrupt, or else we'll have cleared I
 	 interrupt_asserted = 0;
-	
+
 	 if (!I) {
 		 return 0; // Interrupts aren't enabled
 	 }
@@ -1693,14 +1691,14 @@ static int process_interrupts(void)
 }
 
 static void print_state(u8_t op_num, u12_t op, u13_t addr)
-{	 
+{
 
 	u8_t i;
-	
+
 	if (!g_hal->is_log_enabled(LOG_CPU)) {
 		return;
 	}
-	 
+
 	if (op_num == 0) {
 		  for (i = 0; ops[i].log != NULL; i++) {
 			if ((op & ops[i].mask) == ops[i].code) {
@@ -1709,13 +1707,13 @@ static void print_state(u8_t op_num, u12_t op, u13_t addr)
 			}
 		}
 	 }
-	 
+
 	 g_hal->log(LOG_CPU, "0x%04X: ", addr);
-	 
+
 	 for (i = 0; i < call_depth; i++) {
 		 g_hal->log(LOG_CPU, "  ");
 	 }
-	 
+
 	 if (ops[op_num].mask_arg0 != 0) {
 		 /* Two arguments */
 		 g_hal->log(LOG_CPU, ops[op_num].log, (op & ops[op_num].mask_arg0) >> ops[op_num].shift_arg0, op & ~(ops[op_num].mask | ops[op_num].mask_arg0));
@@ -1723,13 +1721,13 @@ static void print_state(u8_t op_num, u12_t op, u13_t addr)
 		 /* One argument */
 		 g_hal->log(LOG_CPU, ops[op_num].log, (op & ~ops[op_num].mask) >> ops[op_num].shift_arg0);
 	 }
-	 
+
 	 if (call_depth < 10) {
 		 for (i = 0; i < (10 - call_depth); i++) {
 			 g_hal->log(LOG_CPU, "  ");
 		 }
 	 }
-	 
+
 	 g_hal->log(LOG_CPU, " ; 0x%03X - ", op);
 	 for (i = 0; i < 12; i++) {
 		 g_hal->log(LOG_CPU, "%s", ((op >> (11 - i)) & 0x1) ? "1" : "0");

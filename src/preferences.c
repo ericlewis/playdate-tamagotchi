@@ -18,12 +18,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 #include "stdbool.h"
-
 #include "preferences.h"
-
-#include "pd_api.h"
-
-PlaydateAPI *pd;
+#include "pd.h"
 
 static const int pref_version = 1;
 
@@ -40,7 +36,7 @@ static uint32_t preferences_read_uint32(void);
 static void preferences_write_uint32(uint32_t value);
 
 void preferences_init(void){
-	
+
 	if(pd->file->stat(pref_filename, NULL) != 0){
 		preferences_save_to_disk();
 	}
@@ -54,9 +50,9 @@ void preferences_read_from_disk(void){
 	if(pref_file != NULL){
 		// read model version
 		preferences_read_uint32();
-		
+
 		preferences_sound_enabled = preferences_read_uint8();
-		
+
 		pd->file->close(pref_file);
 	} else {
 		preferences_sound_enabled = true;
@@ -64,13 +60,13 @@ void preferences_read_from_disk(void){
 }
 
 void preferences_save_to_disk(void){
-	
+
 	pref_file = pd->file->open(pref_filename, kFileWrite);
-	
+
 	preferences_write_uint32(pref_version);
-	
+
 	preferences_write_uint8(preferences_sound_enabled ? 1 : 0);
-	
+
 	pd->file->close(pref_file);
 }
 
@@ -91,17 +87,17 @@ uint32_t preferences_read_uint32(void){
 }
 
 void preferences_write_uint32(uint32_t value){
-	
+
 	unsigned char buffer[sizeof(uint32_t)];
 	cpu_endian_to_big_endian((unsigned char*)&value, buffer, sizeof(uint32_t), 1);
-	
+
 	pd->file->write(pref_file, buffer, sizeof(uint32_t));
 }
 
 void cpu_endian_to_big_endian(unsigned char *src, unsigned char *buffer, size_t size, size_t len){
-	
+
 	int x = 1;
-	
+
 	if(*((char*)&x) == 1){
 		// little endian machine, swap
 		for(size_t i = 0; i < len; i++){
